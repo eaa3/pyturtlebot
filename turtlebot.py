@@ -3,6 +3,11 @@ import time
 import numpy as np
 import math
 
+
+### Twist to left and right wheel commands (differential drive kinematics):
+### Twist = [vx, vy, vz, wx, wy, wz]
+### WheelCMD = [vx - (BASE_WIDTH/2) * wz, vx + (BASE_WIDTH/2) * wz ]
+
 enable_open_gl_rendering = True
 
 def get_image(cam_pos, forward_vector, up_vector):
