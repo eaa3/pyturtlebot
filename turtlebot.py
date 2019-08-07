@@ -8,6 +8,47 @@ import math
 ### Twist = [vx, vy, vz, wx, wy, wz]
 ### WheelCMD = [vx - (BASE_WIDTH/2) * wz, vx + (BASE_WIDTH/2) * wz ]
 
+class RandomMovingAgent(object):
+
+    def __init__(self):
+
+        self.reinit()
+    
+
+    def reinit(self):
+
+        self._id = p.loadURDF("data/marble_cube.urdf", [-1,0,1],globalScaling=np.maximum(0.5,np.random.rand()))
+        self._position = np.ones(3)*1.0 + np.random.rand(3) 
+        self._position[2] = 0.3
+        self._velocity = np.random.randn(3)*0.1
+        self._velocity[2] = 0
+        self._ori = np.array([0,0,0,1])
+
+        self._cid = p.createConstraint(self._id,-1,-1,-1,p.JOINT_FIXED,[0,0,0.1],[0.0,0,0],[0.500000,0.300006,0.700000],self._ori)
+
+        self._move_mat = np.eye(3)
+        self._move_mat[2,2] = 0
+
+    def move(self):
+
+        self._position += self._velocity
+
+        if self._cid is not None:
+            p.changeConstraint(self._cid,self._position,self._ori, maxForce=500)
+
+        # if reset:
+        #     pb.resetBasePositionAndOrientation(self._id, pos, ori, physicsClientId=self._phys_id)
+        self.reset()
+    def reset(self):
+
+        if np.linalg.norm(self._position) >= 2:
+            # self._position = np.random.rand(3)
+            # self._position[2] = 0.3
+            # p.resetBasePositionAndOrientation(self._id, self._position, self._ori)
+
+            self._velocity = np.random.randn(3)*0.1
+            self._velocity[2] = 0
+
 enable_open_gl_rendering = True
 
 def get_image(cam_pos, forward_vector, up_vector):
@@ -44,7 +85,7 @@ offset = [0,0,0]
 
 turtle = p.loadURDF("data/turtlebot.urdf",offset)
 plane = p.loadURDF("data/plane.urdf")
-cube = p.loadURDF("data/marble_cube.urdf", [-1,0,1])
+boxes = [RandomMovingAgent() for i in range(5)]
 p.setRealTimeSimulation(1)
 
 for j in range (p.getNumJoints(turtle)):
@@ -101,7 +142,7 @@ while (1):
 
     p.removeAllUserDebugItems()
 
-    position += np.array([0,0,0.5])
+    position += np.array([0,0,0.30])
     for i in range (numRays):
         rayFrom[i] = position 
         ray_forward = rayForward[i]
@@ -156,4 +197,5 @@ while (1):
     p.setJointMotorControl2(turtle,0,p.VELOCITY_CONTROL,targetVelocity=leftWheelVelocity,force=1000)
     p.setJointMotorControl2(turtle,1,p.VELOCITY_CONTROL,targetVelocity=rightWheelVelocity,force=1000)
 
-
+    for b in boxes:
+        b.move()
