@@ -9,6 +9,8 @@ class TurtleBot(object):
         self.turtle = p.loadURDF("data/turtlebot.urdf",[0,0,0])
         self.plane = p.loadURDF("data/plane.urdf")
         self.target_pos = np.zeros(3)
+        
+        self.position, self.orientation = p.getBasePositionAndOrientation(self.turtle)
 
         self.reset()
 
@@ -41,8 +43,14 @@ class TurtleBot(object):
         
         reset = False
         # print "Position: ", position
-        if np.linalg.norm(position) > 5.0:
-            reset = True
+        if np.linalg.norm(position[:2]) > 10.0:
+            # reset = True
+            p.resetBasePositionAndOrientation(self.turtle, self.position, self.orientation)
+            position, orientation = self.position, self.orientation
+            
+        else:
+            self.position, self.orientation = position, orientation
+
 
         position = np.array(position)[:2]
         orientation = np.array(orientation)
@@ -60,10 +68,10 @@ class TurtleBot(object):
         linear = np.array(linear)
         angular = np.array(angular)
         dist = np.linalg.norm(self.target_pos[:2] - position)
-        reward = -dist*2.0 #- np.linalg.norm(berr)#- np.linalg.norm(linear)*0.1 - np.linalg.norm(angular)*0.1
+        reward = -dist*2.0 - np.linalg.norm(berr)#- np.linalg.norm(linear)*0.1 - np.linalg.norm(angular)*0.1
 
-        if dist <= 0.01:
-            reset = True
+        # if dist <= 0.01:
+        #     reset = True
 
         state = np.hstack([position, berr, direction])
 

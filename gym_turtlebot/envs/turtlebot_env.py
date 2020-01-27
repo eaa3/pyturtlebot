@@ -10,7 +10,7 @@ class TurtleBotEnv(gym.Env):
   metadata = {'render.modes': ['human']}
 
   ACTION = [(5.0, 0.0, 5.0), (-5.0, 0.0, 5.0), 
-            (0.0, 0.5, 5.0), (0.0, -0.5, 5.0),
+            (0.0, 0.25, 5.0), (0.0, -0.25, 5.0),
             (0.0, 0.0, 0.0)] # no op
 
   def __init__(self):
